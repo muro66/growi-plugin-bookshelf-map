@@ -31,13 +31,23 @@
   gap: 0.75rem;
 }
 
+/* Glass UI カード + Micro Interaction（未来UI実験） */
 .grw-bookshelf-card {
   margin: 0;
-  border-radius: 8px;
-  border: 1px solid rgba(79, 195, 247, 0.4);
-  background: rgba(0, 4, 62, 0.4);
-  box-shadow: 0 0 8px rgba(0, 188, 212, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.grw-bookshelf-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(79, 195, 247, 0.15);
+  border-color: rgba(79, 195, 247, 0.5);
 }
 
 .grw-bookshelf-card-link {
@@ -45,11 +55,11 @@
   padding: 0.75rem;
   color: inherit;
   text-decoration: none;
-  transition: background 0.15s;
+  transition: background 0.2s ease;
 }
 
 .grw-bookshelf-card-link:hover {
-  background: rgba(0, 188, 212, 0.12);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .grw-bookshelf-card-cover {
