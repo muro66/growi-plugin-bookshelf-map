@@ -42,6 +42,7 @@ export async function fetchPageByPath(path: string): Promise<GrowiPage | null> {
 
 /**
  * 現在表示中のページパスを取得（DOM または URL から推測）
+ * GROWI v5: URL は ID 形式（/:pageId）のため、data-page-path 等に依存
  */
 export function getCurrentPath(): string {
   if (typeof window === 'undefined') return '/';
@@ -59,12 +60,17 @@ export function getCurrentPath(): string {
 }
 
 /**
- * ページパスから GROWI のページ URL を生成（セグメントごとにエンコード）
- * 例: /E = MF²/foo → origin/page/E%20=%20MF%C2%B2/foo
+ * ページを開く URL を組み立てる。
+ * pageId があればパーマリンク（ID形式）、なければパス形式（/page/:path）
+ * @see https://docs.growi.org/ja/guide/features/copy_to_clipboard.html
  */
-export function buildPageUrl(path: string): string {
+export function buildPageUrl(path: string, pageId?: string): string {
   if (typeof window === 'undefined') return '';
-  const segments = path.split('/').filter((s) => s !== undefined);
+  const origin = window.location.origin;
+  if (pageId && /^[0-9a-f]{24}$/i.test(pageId)) {
+    return `${origin}/${pageId}`;
+  }
+  const segments = path.split('/').filter((s) => s !== undefined && s !== '');
   const encoded = segments.map((s) => encodeURIComponent(s)).join('/');
-  return `${window.location.origin}/page/${encoded}`;
+  return `${origin}/page/${encoded}`;
 }

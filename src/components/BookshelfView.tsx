@@ -54,7 +54,7 @@ export default function BookshelfView({ rootPath, onOpenShelf }: BookshelfViewPr
             return (
               <article key={p.id} className="grw-bookshelf-card">
                 <a
-                  href={buildPageUrl(path)}
+                  href={buildPageUrl(path, p.id)}
                   className="grw-bookshelf-card-link"
                   onClick={(e) => {
                     if (isContainer && onOpenShelf) {

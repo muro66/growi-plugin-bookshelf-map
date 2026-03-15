@@ -13,6 +13,7 @@ interface CachedPage {
   title: string;
   summary: string;
   path: string;
+  pageId?: string;
   at: number;
 }
 
@@ -50,9 +51,9 @@ function ensurePopoverContainer(): HTMLDivElement {
   return el;
 }
 
-function showPopover(x: number, y: number, title: string, summary: string, path: string): void {
+function showPopover(x: number, y: number, title: string, summary: string, path: string, pageId?: string): void {
   const base = ensurePopoverContainer();
-  const pageUrl = buildPageUrl(path);
+  const pageUrl = buildPageUrl(path, pageId);
   base.innerHTML = `
     <div class="grw-bookshelf-link-preview" style="
       background:#0a0a2e; border:1px solid rgba(79,195,247,0.5); border-radius:8px;
@@ -110,7 +111,7 @@ function onMouseOver(e: MouseEvent): void {
     const cached = cache.get(path);
     const now = Date.now();
     if (cached && now - cached.at < CACHE_TTL_MS) {
-      showPopover(e.clientX, e.clientY, cached.title, cached.summary, path);
+      showPopover(e.clientX, e.clientY, cached.title, cached.summary, path, cached.pageId);
       return;
     }
     fetchPageByPath(path).then((page) => {
@@ -122,8 +123,8 @@ function onMouseOver(e: MouseEvent): void {
       const body = page.revision?.body ?? page.body ?? '';
       const title = page.title ?? path.split('/').filter(Boolean).pop() ?? '無題';
       const summary = getSummary(body);
-      cache.set(path, { title, summary, path, at: Date.now() });
-      showPopover(e.clientX, e.clientY, title, summary, path);
+      cache.set(path, { title, summary, path, pageId: page.id, at: Date.now() });
+      showPopover(e.clientX, e.clientY, title, summary, path, page.id);
     }).catch(() => {
       if (currentPath === path) showPopover(e.clientX, e.clientY, '（取得できません）', '', path);
     });

@@ -7,6 +7,7 @@ interface GraphNode {
   path: string;
   label: string;
   isCenter: boolean;
+  pageId?: string;
 }
 
 interface GraphViewProps {
@@ -40,15 +41,19 @@ export default function GraphView({ rootPath }: GraphViewProps) {
         const body = page?.revision?.body ?? page?.body ?? '';
         const links = extractPageLinksFromBody(body, centerPath);
         const centerLabel = page?.title ?? shortenLabel(centerPath, 20);
-        const centerNode: GraphNode = { path: centerPath, label: centerLabel, isCenter: true };
+        const centerNode: GraphNode = { path: centerPath, label: centerLabel, isCenter: true, pageId: page?.id };
         const childPaths = links.length > 0
           ? links
           : directChildren.map((p) => p.path || '').filter(Boolean);
-        const linkNodes: GraphNode[] = childPaths.map((path) => ({
-          path,
-          label: directChildren.find((c) => (c.path || '') === path)?.title ?? shortenLabel(path),
-          isCenter: false,
-        }));
+        const linkNodes: GraphNode[] = childPaths.map((path) => {
+          const child = directChildren.find((c) => (c.path || '') === path);
+          return {
+            path,
+            label: child?.title ?? shortenLabel(path),
+            isCenter: false,
+            pageId: child?.id,
+          };
+        });
         setNodes([centerNode, ...linkNodes]);
         setEdges(childPaths.map((path) => [centerPath, path]));
       })
@@ -61,8 +66,8 @@ export default function GraphView({ rootPath }: GraphViewProps) {
     return () => { cancelled = true; };
   }, [centerPath]);
 
-  const handleNodeClick = (path: string) => {
-    window.location.href = buildPageUrl(path);
+  const handleNodeClick = (path: string, pageId?: string) => {
+    window.location.href = buildPageUrl(path, pageId);
   };
 
   if (loading) return <div className="grw-graph-loading">読み込み中...</div>;
@@ -121,7 +126,7 @@ export default function GraphView({ rootPath }: GraphViewProps) {
             <g
               key={n.path}
               className={'grw-graph-node' + (n.isCenter ? ' grw-graph-node-center' : '')}
-              onClick={() => handleNodeClick(n.path)}
+              onClick={() => handleNodeClick(n.path, n.pageId)}
               style={{ cursor: 'pointer' }}
             >
               <circle cx={pos.x} cy={pos.y} r={n.isCenter ? 24 : 18} />
