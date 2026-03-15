@@ -25,7 +25,7 @@ function getPathFromHref(href: string): string | null {
     const url = href.startsWith('http') ? new URL(href) : new URL(href, window.location.origin);
     const pathname = url.pathname;
     if (url.origin !== window.location.origin) return null;
-    // パス形式: /page/Path/To/Page または /Path/To/Page
+    // パス形式: /Path/To/Page（従来の /page/... も受け付ける）
     const pageMatch = pathname.match(/^\/page(\/(.*))?$/);
     if (pageMatch) {
       const after = pageMatch[2] ?? '';

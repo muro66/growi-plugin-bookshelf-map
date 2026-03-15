@@ -34,8 +34,9 @@ function createBookshelfButton(id: string): HTMLButtonElement {
   btn.id = id;
   btn.type = 'button';
   btn.className = 'btn btn-outline-secondary grw-bookshelf-sidebar-btn';
-  btn.innerHTML = '📚 本棚';
   btn.setAttribute('aria-label', '本棚ビューを開く');
+  btn.title = '本棚ビューを開く';
+  btn.innerHTML = '<span class="grw-bookshelf-sidebar-icon" aria-hidden="true">📚</span>';
   btn.style.marginTop = '0.5rem';
   btn.style.marginLeft = '0.25rem';
   btn.style.marginRight = '0.25rem';

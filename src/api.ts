@@ -42,7 +42,7 @@ export async function fetchPageByPath(path: string): Promise<GrowiPage | null> {
 
 /**
  * 現在表示中のページパスを取得（DOM または URL から推測）
- * GROWI v5: URL は ID 形式（/:pageId）のため、data-page-path 等に依存
+ * 対応: data-page-path, meta growi:path, URL パス形式（/path または /path/to/page）
  */
 export function getCurrentPath(): string {
   if (typeof window === 'undefined') return '/';
@@ -51,10 +51,15 @@ export function getCurrentPath(): string {
   if (el?.dataset?.pagePath) return el.dataset.pagePath;
   const meta = doc.querySelector('meta[property="growi:path"]') as HTMLMetaElement | null;
   if (meta?.content) return meta.content;
-  const m = window.location.pathname.match(/^\/page\/(.+)$/);
-  if (m) {
-    const raw = m[1];
+  const pathname = window.location.pathname;
+  const pageMatch = pathname.match(/^\/page\/(.+)$/);
+  if (pageMatch) {
+    const raw = pageMatch[1];
     return '/' + raw.split('/').map((s) => decodeURIComponent(s)).join('/');
+  }
+  if (pathname && pathname !== '/' && !/^\/[0-9a-f]{24}$/i.test(pathname)) {
+    const decoded = pathname.split('/').filter(Boolean).map((s) => decodeURIComponent(s)).join('/');
+    return decoded ? '/' + decoded : '/';
   }
   return '/';
 }
