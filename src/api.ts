@@ -1,4 +1,4 @@
-import type { PagesListResponse } from './types';
+import type { PagesListResponse, GrowiPage } from './types';
 
 const BASE = typeof window !== 'undefined' ? window.location.origin : '';
 
@@ -13,6 +13,19 @@ export async function fetchPagesUnderPath(path: string): Promise<PagesListRespon
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const data = await res.json();
   return { pages: data.pages ?? [], totalCount: data.totalCount };
+}
+
+/**
+ * GROWI API v3: パスで単一ページを取得（リンクプレビュー・グラフ用）
+ */
+export async function fetchPageByPath(path: string): Promise<GrowiPage | null> {
+  const normalized = path.replace(/^\//, '') || '';
+  const query = new URLSearchParams({ path: '/' + normalized });
+  const url = `${BASE}/_api/v3/page?${query}`;
+  const res = await fetch(url, { credentials: 'include' });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.page ?? data ?? null;
 }
 
 /**

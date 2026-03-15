@@ -23,6 +23,34 @@
   border-bottom: 1px solid rgba(79, 195, 247, 0.3);
   background: rgba(0, 4, 62, 0.6);
   flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.grw-bookshelf-panel-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.grw-bookshelf-tab {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(232, 234, 246, 0.8);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.grw-bookshelf-tab:hover {
+  color: #e8eaf6;
+  background: rgba(0, 188, 212, 0.1);
+}
+
+.grw-bookshelf-tab.is-active {
+  border-color: rgba(79, 195, 247, 0.5);
+  background: rgba(0, 188, 212, 0.2);
+  color: #e8eaf6;
 }
 
 .grw-bookshelf-panel-title {

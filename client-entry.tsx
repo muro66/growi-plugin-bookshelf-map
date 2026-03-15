@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import Panel from './src/components/Panel';
+import { setupLinkPreview, cleanupLinkPreview } from './src/linkPreview';
 
 const PLUGIN_ID = 'growi-plugin-bookshelf-map';
 const SIDEBAR_BTN_ID = 'grw-bookshelf-sidebar-btn';
@@ -91,6 +92,7 @@ function removePanelRoot(): void {
 
 const activate = (): void => {
   if (typeof window === 'undefined') return;
+  setupLinkPreview();
   function tryAdd() {
     if (addSidebarButton()) return;
     addFallbackButton();
@@ -113,6 +115,7 @@ const activate = (): void => {
 };
 
 const deactivate = (): void => {
+  cleanupLinkPreview();
   removeSidebarButton();
   removePanelRoot();
 };
