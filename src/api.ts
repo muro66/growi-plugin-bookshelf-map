@@ -1,5 +1,17 @@
 import type { PagesListResponse, GrowiPage } from './types';
 
+/** 指定パスの直下の子のみにフィルタ（list API は配下全体を返すことがあるため） */
+export function filterDirectChildren(pages: GrowiPage[], parentPath: string): GrowiPage[] {
+  return pages.filter((p) => {
+    const path = p.path || '';
+    if (path === parentPath) return false;
+    const prefix = parentPath === '/' ? '/' : parentPath.replace(/\/$/, '') + '/';
+    if (!path.startsWith(prefix)) return false;
+    const rest = path.slice(prefix.length);
+    return rest !== '' && !rest.includes('/');
+  });
+}
+
 const BASE = typeof window !== 'undefined' ? window.location.origin : '';
 
 /**
@@ -39,6 +51,20 @@ export function getCurrentPath(): string {
   const meta = doc.querySelector('meta[property="growi:path"]') as HTMLMetaElement | null;
   if (meta?.content) return meta.content;
   const m = window.location.pathname.match(/^\/page\/(.+)$/);
-  if (m) return '/' + decodeURIComponent(m[1]);
+  if (m) {
+    const raw = m[1];
+    return '/' + raw.split('/').map((s) => decodeURIComponent(s)).join('/');
+  }
   return '/';
+}
+
+/**
+ * ページパスから GROWI のページ URL を生成（セグメントごとにエンコード）
+ * 例: /E = MF²/foo → origin/page/E%20=%20MF%C2%B2/foo
+ */
+export function buildPageUrl(path: string): string {
+  if (typeof window === 'undefined') return '';
+  const segments = path.split('/').filter((s) => s !== undefined);
+  const encoded = segments.map((s) => encodeURIComponent(s)).join('/');
+  return `${window.location.origin}/page/${encoded}`;
 }

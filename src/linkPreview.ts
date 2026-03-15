@@ -2,7 +2,7 @@
  * 自サイトリンクにマウスオーバーでリンク先ページの要約をポップオーバー表示する
  */
 
-import { fetchPageByPath } from './api';
+import { fetchPageByPath, buildPageUrl } from './api';
 
 const HOVER_DELAY_MS = 500;
 const SUMMARY_LENGTH = 200;
@@ -25,7 +25,7 @@ function getPathFromHref(href: string): string | null {
     const match = url.pathname.match(/^\/page(\/(.*))?$/);
     if (!match) return null;
     const after = match[2] ?? '';
-    return '/' + decodeURIComponent(after);
+    return '/' + after.split('/').map((s) => decodeURIComponent(s)).join('/');
   } catch {
     return null;
   }
@@ -52,7 +52,7 @@ function ensurePopoverContainer(): HTMLDivElement {
 
 function showPopover(x: number, y: number, title: string, summary: string, path: string): void {
   const base = ensurePopoverContainer();
-  const pageUrl = window.location.origin + '/page' + path;
+  const pageUrl = buildPageUrl(path);
   base.innerHTML = `
     <div class="grw-bookshelf-link-preview" style="
       background:#0a0a2e; border:1px solid rgba(79,195,247,0.5); border-radius:8px;

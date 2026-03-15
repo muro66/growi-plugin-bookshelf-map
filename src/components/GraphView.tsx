@@ -1,9 +1,7 @@
 import React from 'react';
-import { getCurrentPath, fetchPageByPath } from '../api';
+import { getCurrentPath, fetchPageByPath, fetchPagesUnderPath, filterDirectChildren, buildPageUrl } from '../api';
 import { extractPageLinksFromBody } from '../graphUtils';
 import './GraphView.css';
-
-const PAGE_URL_BASE = typeof window !== 'undefined' ? window.location.origin + '/page' : '';
 
 interface GraphNode {
   path: string;
@@ -33,20 +31,26 @@ export default function GraphView({ rootPath }: GraphViewProps) {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetchPageByPath(centerPath)
-      .then((page) => {
+    Promise.all([
+      fetchPageByPath(centerPath),
+      fetchPagesUnderPath(centerPath).then((r) => filterDirectChildren(r.pages || [], centerPath)),
+    ])
+      .then(([page, directChildren]) => {
         if (cancelled) return;
         const body = page?.revision?.body ?? page?.body ?? '';
         const links = extractPageLinksFromBody(body, centerPath);
         const centerLabel = page?.title ?? shortenLabel(centerPath, 20);
         const centerNode: GraphNode = { path: centerPath, label: centerLabel, isCenter: true };
-        const linkNodes: GraphNode[] = links.map((path) => ({
+        const childPaths = links.length > 0
+          ? links
+          : directChildren.map((p) => p.path || '').filter(Boolean);
+        const linkNodes: GraphNode[] = childPaths.map((path) => ({
           path,
-          label: shortenLabel(path),
+          label: directChildren.find((c) => (c.path || '') === path)?.title ?? shortenLabel(path),
           isCenter: false,
         }));
         setNodes([centerNode, ...linkNodes]);
-        setEdges(links.map((path) => [centerPath, path]));
+        setEdges(childPaths.map((path) => [centerPath, path]));
       })
       .catch((e) => {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load');
@@ -58,15 +62,15 @@ export default function GraphView({ rootPath }: GraphViewProps) {
   }, [centerPath]);
 
   const handleNodeClick = (path: string) => {
-    window.location.href = PAGE_URL_BASE + path;
+    window.location.href = buildPageUrl(path);
   };
 
   if (loading) return <div className="grw-graph-loading">読み込み中...</div>;
   if (error) return <div className="grw-graph-error">{error}</div>;
-  if (nodes.length === 0) {
+  if (nodes.length <= 1) {
     return (
       <div className="grw-graph-empty">
-        リンクがありません。現在ページの本文に <code>[表示名](/path)</code> 形式のリンクがあるとグラフに表示されます。
+        表示するリンク・子ページがありません。本文に <code>[表示名](/path)</code> 形式のリンクがあるか、直下にページがあるとグラフに表示されます。
       </div>
     );
   }

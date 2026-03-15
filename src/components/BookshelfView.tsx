@@ -1,13 +1,7 @@
 import React from 'react';
 import type { GrowiPage } from '../types';
-import { fetchPagesUnderPath } from '../api';
+import { fetchPagesUnderPath, buildPageUrl, filterDirectChildren } from '../api';
 import './BookshelfView.css';
-
-const PAGE_URL_BASE = typeof window !== 'undefined' ? window.location.origin + '/page' : '';
-
-function pageUrl(path: string): string {
-  return PAGE_URL_BASE + path;
-}
 
 interface BookshelfViewProps {
   rootPath: string;
@@ -26,7 +20,7 @@ export default function BookshelfView({ rootPath, onOpenShelf }: BookshelfViewPr
     fetchPagesUnderPath(rootPath)
       .then((res) => {
         if (!cancelled) {
-          const list = res.pages || [];
+          const list = filterDirectChildren(res.pages || [], rootPath);
           setPages(list);
         }
       })
@@ -60,7 +54,7 @@ export default function BookshelfView({ rootPath, onOpenShelf }: BookshelfViewPr
             return (
               <article key={p.id} className="grw-bookshelf-card">
                 <a
-                  href={pageUrl(path)}
+                  href={buildPageUrl(path)}
                   className="grw-bookshelf-card-link"
                   onClick={(e) => {
                     if (isContainer && onOpenShelf) {
