@@ -23,10 +23,19 @@ function getPathFromHref(href: string): string | null {
   if (typeof href !== 'string') return null;
   try {
     const url = href.startsWith('http') ? new URL(href) : new URL(href, window.location.origin);
-    const match = url.pathname.match(/^\/page(\/(.*))?$/);
-    if (!match) return null;
-    const after = match[2] ?? '';
-    return '/' + after.split('/').map((s) => decodeURIComponent(s)).join('/');
+    const pathname = url.pathname;
+    if (url.origin !== window.location.origin) return null;
+    // パス形式: /page/Path/To/Page または /Path/To/Page
+    const pageMatch = pathname.match(/^\/page(\/(.*))?$/);
+    if (pageMatch) {
+      const after = pageMatch[2] ?? '';
+      return '/' + after.split('/').map((s) => decodeURIComponent(s)).join('/');
+    }
+    // パス形式（page 階層なし）: /Path/To/Page（先頭が / で 24 文字 hex だけの場合は ID 形式のためスキップ）
+    if (pathname === '' || pathname === '/') return null;
+    if (/^\/[0-9a-f]{24}$/i.test(pathname)) return null;
+    const decoded = pathname.split('/').filter(Boolean).map((s) => decodeURIComponent(s)).join('/');
+    return decoded ? '/' + decoded : null;
   } catch {
     return null;
   }

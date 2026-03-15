@@ -61,7 +61,7 @@ export function getCurrentPath(): string {
 
 /**
  * ページを開く URL を組み立てる。
- * pageId があればパーマリンク（ID形式）、なければパス形式（/page/:path）
+ * pageId があればパーマリンク（ID形式）、なければパス形式（/:path）
  * @see https://docs.growi.org/ja/guide/features/copy_to_clipboard.html
  */
 export function buildPageUrl(path: string, pageId?: string): string {
@@ -72,5 +72,5 @@ export function buildPageUrl(path: string, pageId?: string): string {
   }
   const segments = path.split('/').filter((s) => s !== undefined && s !== '');
   const encoded = segments.map((s) => encodeURIComponent(s)).join('/');
-  return `${origin}/page/${encoded}`;
+  return `${origin}/${encoded}`;
 }
